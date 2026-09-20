@@ -64,7 +64,10 @@ spec:
             {{- end }}{{- end }}
           {{- end }}
           {{- end }}
-          resources: {{- toYaml ($workload.resources | default $root.Values.defaults.resources) | nindent 12 }}
+          {{- $resources := $workload.resources | default $root.Values.defaults.resources }}
+          {{- if $resources }}
+          resources: {{- toYaml $resources | nindent 12 }}
+          {{- end }}
           {{- with $workload.configMounts }}
           volumeMounts:
             {{- range . }}
