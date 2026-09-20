@@ -16,4 +16,4 @@ The chart does not create a Namespace. Service-account token mounting is disable
 
 Values contract changes that require consumer changes are a SemVer major version. Additive optional values are minor releases; fixes are patch releases. The repository publishes the chart through GitHub Pages on pushes to `main`; consume it with `https://lolmeida.github.io/platform-helm` and a pinned SemVer constraint. OCI publication is optional and requires a token with package-write scope.
 
-Run `tests/render.sh` before publishing.
+Run `tests/render.sh` before publishing the chart.
