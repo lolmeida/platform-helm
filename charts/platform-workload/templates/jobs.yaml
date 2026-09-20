@@ -1,0 +1,38 @@
+{{- $root := . -}}
+{{- range $name, $job := .Values.bootstrapJobs }}
+{{- if $job.enabled }}
+{{- if not $job.image }}{{ fail (printf "bootstrapJobs.%s.image is required" $name) }}{{ end }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "platform-workload.fullname" $root }}-{{ $name }}
+  namespace: {{ include "platform-workload.namespace" $root }}
+  labels:
+    {{- include "platform-workload.labels" $root | nindent 4 }}
+spec:
+  backoffLimit: {{ $job.backoffLimit | default 3 }}
+  template:
+    metadata:
+      labels:
+        {{- include "platform-workload.labels" $root | nindent 8 }}
+    spec:
+      restartPolicy: {{ $job.restartPolicy | default "OnFailure" }}
+      automountServiceAccountToken: {{ $job.automountServiceAccountToken | default false }}
+      containers:
+        - name: {{ $name }}
+          image: {{ include "platform-workload.image" (dict "image" $job.image) | quote }}
+          {{- with $job.command }}
+          command: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $job.args }}
+          args: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $job.secretRefs }}
+          envFrom:
+            {{- range . }}
+            - secretRef: {name: {{ . }}}
+            {{- end }}
+          {{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: platform-workload
+description: Generic Kubernetes workloads, services, routes, configuration and monitoring
+type: application
+version: 0.1.0

@@ -1,0 +1,4 @@
+nameOverride: minimal
+workloads:
+  worker:
+    image: {repository: example/worker, tag: v1}

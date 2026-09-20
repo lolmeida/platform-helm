@@ -1,0 +1,29 @@
+nameOverride: example
+runtimeConfig: {LOG_LEVEL: INFO}
+workloads:
+  backend:
+    image: {repository: registry.example/backend, tag: sha-abc, digest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+    containerPort: 8080
+    env: {APP_VERSION: '{{ .Values.workloads.backend.image.tag }}'}
+    envFromConfigMap: true
+    secretRefs: [backend-runtime]
+    probes:
+      startup: {path: /started, periodSeconds: 10, timeoutSeconds: 3, failureThreshold: 30}
+      readiness: {path: /ready, initialDelaySeconds: 5}
+      liveness: {path: /live, initialDelaySeconds: 10}
+  frontend:
+    image: {repository: registry.example/frontend, tag: sha-def}
+    containerPort: 8080
+services:
+  backend: {workload: backend, port: 8080, targetPort: http}
+  frontend: {workload: frontend, port: 80, targetPort: http}
+routes:
+  public:
+    host: app.example.com
+    className: nginx
+    tls: [{hosts: [app.example.com], secretName: example-tls}]
+    rules:
+      - {path: /api, service: backend, port: 8080}
+      - {path: /, service: frontend, port: 80}
+monitoring:
+  backend: {service: backend, path: /metrics}

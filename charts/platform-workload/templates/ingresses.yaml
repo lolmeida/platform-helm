@@ -1,0 +1,38 @@
+{{- $root := . -}}
+{{- range $name, $route := .Values.routes }}
+{{- if $route.enabled | default true }}
+{{- range $rule := $route.rules }}
+{{- if not (index $root.Values.services $rule.service) }}{{ fail (printf "route %s references missing service %s" $name $rule.service) }}{{ end }}
+{{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "platform-workload.fullname" $root }}-{{ $name }}
+  namespace: {{ include "platform-workload.namespace" $root }}
+  labels:
+    {{- include "platform-workload.labels" $root | nindent 4 }}
+  {{- with $route.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $route.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with $route.tls }}
+  tls: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - host: {{ required (printf "routes.%s.host is required" $name) $route.host }}
+      http:
+        paths:
+          {{- range $rule := $route.rules }}
+          - path: {{ required "route path is required" $rule.path }}
+            pathType: {{ $rule.pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "platform-workload.fullname" $root }}-{{ $rule.service }}
+                port: {number: {{ required "route port is required" $rule.port }}}
+          {{- end }}
+{{- end }}
+{{- end }}

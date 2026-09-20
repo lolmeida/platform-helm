@@ -1,0 +1,24 @@
+{{- $root := . -}}
+{{- range $name, $service := .Values.services }}
+{{- if $service.enabled | default true }}
+{{- $workload := index $root.Values.workloads $service.workload -}}
+{{- if not $workload }}{{ fail (printf "service %s references missing workload %s" $name $service.workload) }}{{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "platform-workload.fullname" $root }}-{{ $name }}
+  namespace: {{ include "platform-workload.namespace" $root }}
+  labels:
+    {{- include "platform-workload.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $service.workload }}
+spec:
+  type: {{ $service.type | default "ClusterIP" }}
+  selector:
+    {{- include "platform-workload.workloadLabels" (dict "root" $root "name" $service.workload) | nindent 4 }}
+  ports:
+    - name: {{ $service.portName | default "http" }}
+      port: {{ required (printf "services.%s.port is required" $name) $service.port }}
+      targetPort: {{ $service.targetPort | default "http" }}
+{{- end }}
+{{- end }}

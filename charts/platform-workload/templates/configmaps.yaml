@@ -1,0 +1,13 @@
+{{- if .Values.runtimeConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "platform-workload.fullname" . }}-runtime
+  namespace: {{ include "platform-workload.namespace" . }}
+  labels:
+    {{- include "platform-workload.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.runtimeConfig }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}

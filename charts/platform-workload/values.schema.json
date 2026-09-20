@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "nameOverride": {"type":"string"},
+    "fullnameOverride": {"type":"string"},
+    "namespace": {"type":"string"},
+    "defaults": {"type":"object"},
+    "runtimeConfig": {"type":"object"},
+    "workloads": {"type":"object"},
+    "services": {"type":"object"},
+    "routes": {"type":"object"},
+    "monitoring": {"type":"object"},
+    "externalSecrets": {"type":"object"},
+    "bootstrapJobs": {"type":"object"}
+  }
+}

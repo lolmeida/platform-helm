@@ -1,0 +1,18 @@
+nameOverride: ""
+fullnameOverride: ""
+namespace: ""
+defaults:
+  imagePullPolicy: IfNotPresent
+  replicas: 1
+  rollout: {maxSurge: 1, maxUnavailable: 0}
+  podSecurityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+  containerSecurityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+  resources: {}
+  automountServiceAccountToken: false
+runtimeConfig: {}
+workloads: {}
+services: {}
+routes: {}
+monitoring: {}
+externalSecrets: {}
+bootstrapJobs: {}

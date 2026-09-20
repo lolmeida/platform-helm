@@ -1,0 +1,87 @@
+{{- $root := . -}}
+{{- range $name, $workload := .Values.workloads }}
+{{- if $workload.enabled | default true }}
+{{- $rollout := $workload.rollout | default $root.Values.defaults.rollout -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "platform-workload.fullname" $root }}-{{ $name }}
+  namespace: {{ include "platform-workload.namespace" $root }}
+  labels:
+    {{- include "platform-workload.workloadLabels" (dict "root" $root "name" $name) | nindent 4 }}
+spec:
+  replicas: {{ $workload.replicas | default $root.Values.defaults.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ $rollout.maxSurge }}
+      maxUnavailable: {{ $rollout.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "platform-workload.workloadLabels" (dict "root" $root "name" $name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "platform-workload.workloadLabels" (dict "root" $root "name" $name) | nindent 8 }}
+      {{- if or $root.Values.runtimeConfig $workload.configMounts }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmaps.yaml") $root | sha256sum | quote }}
+      {{- end }}
+    spec:
+      automountServiceAccountToken: {{ $workload.automountServiceAccountToken | default $root.Values.defaults.automountServiceAccountToken }}
+      securityContext: {{- toYaml ($workload.podSecurityContext | default $root.Values.defaults.podSecurityContext) | nindent 8 }}
+      containers:
+        - name: {{ $name }}
+          image: {{ include "platform-workload.image" (dict "image" $workload.image) | quote }}
+          imagePullPolicy: {{ $workload.imagePullPolicy | default $root.Values.defaults.imagePullPolicy }}
+          securityContext: {{- toYaml ($workload.containerSecurityContext | default $root.Values.defaults.containerSecurityContext) | nindent 12 }}
+          {{- with $workload.containerPort }}
+          ports: [{name: http, containerPort: {{ . }} }]
+          {{- end }}
+          {{- if or $workload.env $workload.envFromConfigMap $workload.secretRefs }}
+          env:
+            {{- range $key, $value := $workload.env }}
+            - name: {{ $key }}
+              value: {{ tpl ($value | toString) $root | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if or $workload.envFromConfigMap $workload.secretRefs }}
+          envFrom:
+            {{- if $workload.envFromConfigMap }}
+            - configMapRef: {name: {{ include "platform-workload.fullname" $root }}-runtime}
+            {{- end }}
+            {{- range $secret := $workload.secretRefs }}
+            - secretRef: {name: {{ $secret }}}
+            {{- end }}
+          {{- end }}
+          {{- range $probeName, $probe := $workload.probes }}
+          {{- if and (ne $probeName "enabled") (or (not (hasKey $probe "enabled")) $probe.enabled) }}
+          {{ $probeName }}Probe:
+            httpGet: {path: {{ required (printf "workloads.%s.probes.%s.path is required" $name $probeName) $probe.path }}, port: {{ $probe.port | default "http" }}}
+            {{- range $key, $value := $probe }}{{- if and (ne $key "path") (ne $key "port") (ne $key "enabled") }}
+            {{ $key }}: {{ $value }}
+            {{- end }}{{- end }}
+          {{- end }}
+          {{- end }}
+          resources: {{- toYaml ($workload.resources | default $root.Values.defaults.resources) | nindent 12 }}
+          {{- with $workload.configMounts }}
+          volumeMounts:
+            {{- range . }}
+            - name: {{ .name | default "runtime-config" }}
+              mountPath: {{ required "configMounts.mountPath is required" .mountPath }}
+              {{- with .subPath }}
+              subPath: {{ . }}
+              {{- end }}
+              readOnly: true
+            {{- end }}
+          {{- end }}
+      {{- with $workload.configMounts }}
+      volumes:
+        {{- range . }}
+        - name: {{ .name | default "runtime-config" }}
+          configMap: {name: {{ required "configMounts.configMap is required" .configMap }}}
+        {{- end }}
+      {{- end }}
+{{- end }}
+{{- end }}
