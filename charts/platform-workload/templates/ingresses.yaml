@@ -8,7 +8,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "platform-workload.fullname" $root }}-{{ $name }}
+  name: {{ $route.name | default (printf "%s-%s" (include "platform-workload.fullname" $root) $name) }}
   namespace: {{ include "platform-workload.namespace" $root }}
   labels:
     {{- include "platform-workload.labels" $root | nindent 4 }}

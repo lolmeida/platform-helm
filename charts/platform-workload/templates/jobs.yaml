@@ -6,7 +6,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "platform-workload.fullname" $root }}-{{ $name }}
+  name: {{ $job.name | default (printf "%s-%s" (include "platform-workload.fullname" $root) $name) }}
   namespace: {{ include "platform-workload.namespace" $root }}
   labels:
     {{- include "platform-workload.labels" $root | nindent 4 }}
@@ -20,7 +20,7 @@ spec:
       restartPolicy: {{ $job.restartPolicy | default "OnFailure" }}
       automountServiceAccountToken: {{ $job.automountServiceAccountToken | default false }}
       containers:
-        - name: {{ $name }}
+        - name: {{ $job.containerName | default $name }}
           image: {{ include "platform-workload.image" (dict "image" $job.image) | quote }}
           {{- with $job.command }}
           command: {{- toYaml . | nindent 12 }}
@@ -32,7 +32,15 @@ spec:
           env:
             {{- range $key, $value := . }}
             - name: {{ $key }}
-              value: {{ tpl ($value | toString) $root | quote }}
+              value: {{- if contains "{{" ($value | toString) }} {{ tpl ($value | toString) $root | quote }}{{- else }} {{ $value | quote }}{{- end }}
+            {{- end }}
+          {{- end }}
+          {{- with $job.secretEnv }}
+          {{- if not $job.env }}env:{{ end }}
+            {{- range $key, $value := . }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef: {name: {{ required "bootstrap secretEnv.name is required" $value.name }}, key: {{ required "bootstrap secretEnv.key is required" $value.key }}}
             {{- end }}
           {{- end }}
           {{- with $job.secretRefs }}

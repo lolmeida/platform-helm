@@ -24,6 +24,6 @@ metadata:
 data:
   {{- range $key, $value := $config.data }}
   {{ $key }}: |
-{{ tpl ($value | toString) $ | nindent 4 }}
+{{ tpl ($value | toString) $ | indent 4 }}
   {{- end }}
 {{- end }}
