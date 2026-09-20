@@ -8,8 +8,15 @@ metadata:
   labels:
     {{- include "platform-workload.labels" . | nindent 4 }}
 data:
-  {{- range $key, $value := .Values.runtimeConfig }}
+  {{- $runtimeEnv := .Values.runtimeConfig.env | default .Values.runtimeConfig }}
+  {{- range $key, $value := $runtimeEnv }}
+  {{- if ne $key "files" }}
   {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  {{- range $key, $value := .Values.runtimeConfig.files }}
+  {{ $key }}: |
+{{ tpl ($value | toString) $ | indent 4 }}
   {{- end }}
 {{- end }}
 {{- range $name, $config := .Values.configMaps }}
