@@ -8,3 +8,5 @@ grep -q 'kind: Deployment' /tmp/platform-workload-minimal.yaml
 grep -q 'checksum/config:' /tmp/platform-workload-full.yaml
 grep -q 'kind: PodMonitor' /tmp/platform-workload-full.yaml
 if helm template invalid "$root" -f <(printf 'workloads: {one: {image: {repository: example/one}}}\n') >/dev/null 2>&1; then exit 1; fi
+helm template digest "$root" -f <(printf 'workloads: {one: {image: {repository: example/one, digest: sha256:%064d}}}\n' 0) | grep -q 'example/one@sha256:'
+if helm template invalid-route "$root" -f <(printf 'workloads: {one: {image: {repository: example/one, tag: v1}}}\nservices: {bad: {workload: missing, port: 80}}\n') >/dev/null 2>&1; then exit 1; fi
