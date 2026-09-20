@@ -1,6 +1,6 @@
 {{- $root := . -}}
 {{- range $name, $route := .Values.routes }}
-{{- if $route.enabled | default true }}
+{{- if or (not (hasKey $route "enabled")) $route.enabled }}
 {{- range $rule := $route.rules }}
 {{- if not (index $root.Values.services $rule.service) }}{{ fail (printf "route %s references missing service %s" $name $rule.service) }}{{ end }}
 {{- end }}

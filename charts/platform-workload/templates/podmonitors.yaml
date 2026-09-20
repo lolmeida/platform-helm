@@ -1,6 +1,6 @@
 {{- $root := . -}}
 {{- range $name, $monitor := .Values.monitoring }}
-{{- if $monitor.enabled | default true }}
+{{- if or (not (hasKey $monitor "enabled")) $monitor.enabled }}
 {{- if not (index $root.Values.services $monitor.service) }}{{ fail (printf "monitoring %s references missing service %s" $name $monitor.service) }}{{ end }}
 ---
 apiVersion: monitoring.coreos.com/v1

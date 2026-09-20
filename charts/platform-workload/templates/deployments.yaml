@@ -1,6 +1,6 @@
 {{- $root := . -}}
 {{- range $name, $workload := .Values.workloads }}
-{{- if $workload.enabled | default true }}
+{{- if or (not (hasKey $workload "enabled")) $workload.enabled }}
 {{- $rollout := $workload.rollout | default $root.Values.defaults.rollout -}}
 ---
 apiVersion: apps/v1
