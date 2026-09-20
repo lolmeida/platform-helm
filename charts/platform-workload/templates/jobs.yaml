@@ -28,6 +28,13 @@ spec:
           {{- with $job.args }}
           args: {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with $job.env }}
+          env:
+            {{- range $key, $value := . }}
+            - name: {{ $key }}
+              value: {{ tpl ($value | toString) $root | quote }}
+            {{- end }}
+          {{- end }}
           {{- with $job.secretRefs }}
           envFrom:
             {{- range . }}
