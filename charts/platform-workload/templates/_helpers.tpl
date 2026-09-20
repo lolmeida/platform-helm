@@ -13,6 +13,7 @@ app.kubernetes.io/component: {{ .name }}
 {{- end -}}
 {{- define "platform-workload.image" -}}
 {{- $image := .image -}}{{- $repository := required "image.repository is required" $image.repository -}}
+{{- if and $image.digest (not (regexMatch "^sha256:[a-f0-9]{64}$" $image.digest)) }}{{ fail "image.digest must match sha256:<64 lowercase hexadecimal characters>" }}{{ end -}}
 {{- if $image.digest -}}{{ printf "%s%s@%s" $repository (ternary (printf ":%s" $image.tag) "" (not (empty $image.tag))) $image.digest -}}
 {{- else if $image.tag -}}{{ printf "%s:%s" $repository $image.tag -}}{{- else -}}{{ fail "image requires tag or digest" }}{{- end -}}
 {{- end -}}

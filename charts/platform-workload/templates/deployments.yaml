@@ -37,6 +37,7 @@ spec:
           imagePullPolicy: {{ $workload.imagePullPolicy | default $root.Values.defaults.imagePullPolicy }}
           securityContext: {{- toYaml ($workload.containerSecurityContext | default $root.Values.defaults.containerSecurityContext) | nindent 12 }}
           {{- with $workload.containerPort }}
+          {{- if or (lt (int .) 1) (gt (int .) 65535) }}{{ fail (printf "workloads.%s.containerPort must be between 1 and 65535" $name) }}{{ end }}
           ports: [{name: http, containerPort: {{ . }} }]
           {{- end }}
           {{- if or $workload.env $workload.envFromConfigMap $workload.secretRefs }}
