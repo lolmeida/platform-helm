@@ -12,7 +12,7 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" }}
 app.kubernetes.io/component: {{ .name }}
 {{- end -}}
 {{- define "platform-workload.image" -}}
-{{- $image := .image -}}{{- required "image.repository is required" $image.repository -}}
-{{- if $image.digest -}}{{ printf "%s%s@%s" $image.repository (ternary (printf ":%s" $image.tag) "" (not (empty $image.tag))) $image.digest -}}
-{{- else if $image.tag -}}{{ printf "%s:%s" $image.repository $image.tag -}}{{- else -}}{{ fail "image requires tag or digest" }}{{- end -}}
+{{- $image := .image -}}{{- $repository := required "image.repository is required" $image.repository -}}
+{{- if $image.digest -}}{{ printf "%s%s@%s" $repository (ternary (printf ":%s" $image.tag) "" (not (empty $image.tag))) $image.digest -}}
+{{- else if $image.tag -}}{{ printf "%s:%s" $repository $image.tag -}}{{- else -}}{{ fail "image requires tag or digest" }}{{- end -}}
 {{- end -}}
