@@ -8,6 +8,7 @@
     "namespace": {"type":"string"},
     "defaults": {"type":"object"},
     "runtimeConfig": {"type":"object"},
+    "configMaps": {"type":"object"},
     "workloads": {"type":"object"},
     "services": {"type":"object"},
     "routes": {"type":"object"},

@@ -10,6 +10,7 @@ defaults:
   resources: {}
   automountServiceAccountToken: false
 runtimeConfig: {}
+configMaps: {}
 workloads: {}
 services: {}
 routes: {}

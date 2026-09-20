@@ -24,7 +24,7 @@ spec:
     metadata:
       labels:
         {{- include "platform-workload.workloadLabels" (dict "root" $root "name" $name) | nindent 8 }}
-      {{- if or $root.Values.runtimeConfig $workload.configMounts }}
+      {{- if or $root.Values.runtimeConfig $root.Values.configMaps $workload.configMounts }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmaps.yaml") $root | sha256sum | quote }}
       {{- end }}

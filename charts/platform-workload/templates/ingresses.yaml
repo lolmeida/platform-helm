@@ -20,7 +20,8 @@ spec:
   ingressClassName: {{ . }}
   {{- end }}
   {{- with $route.tls }}
-  tls: {{- toYaml . | nindent 4 }}
+  tls:
+{{ toYaml . | nindent 4 }}
   {{- end }}
   rules:
     - host: {{ required (printf "routes.%s.host is required" $name) $route.host }}
@@ -32,7 +33,11 @@ spec:
             backend:
               service:
                 name: {{ include "platform-workload.fullname" $root }}-{{ $rule.service }}
+                {{- if $rule.portName }}
+                port: {name: {{ $rule.portName }}}
+                {{- else }}
                 port: {number: {{ required "route port is required" $rule.port }}}
+                {{- end }}
           {{- end }}
 {{- end }}
 {{- end }}
