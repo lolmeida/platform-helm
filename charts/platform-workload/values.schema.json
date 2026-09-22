@@ -8,6 +8,7 @@
     "namespace": {"type":"string"},
     "global": {"type":"object"},
     "defaults": {"type":"object"},
+    "profiles": {"type":"object"},
     "runtimeConfig": {"type":"object"},
     "configMaps": {"type":"object"},
     "frontendRuntime": {"type":"object"},
