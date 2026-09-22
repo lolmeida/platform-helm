@@ -1,5 +1,6 @@
 {{- $root := . -}}
-{{- range $name, $workload := .Values.workloads }}
+{{- range $name, $rawWorkload := .Values.workloads }}
+{{- $workload := include "platform-workload.effectiveWorkload" (dict "root" $root "name" $name "workload" $rawWorkload) | fromYaml -}}
 {{- if or (not (hasKey $workload "enabled")) $workload.enabled }}
 {{- $rollout := $workload.rollout | default $root.Values.defaults.rollout -}}
 ---
