@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   platform-workload:
   - apiVersion: v2
+    created: "2026-09-22T13:24:04.686176939Z"
+    description: Generic Kubernetes workloads, services, routes, configuration and
+      monitoring
+    digest: 56bbb188a59f0ef793cfdc01b6c9dcdb095a85027d8f49ff5e024b2ff358b468
+    name: platform-workload
+    type: application
+    urls:
+    - platform-workload-0.2.2.tgz
+    version: 0.2.2
+  - apiVersion: v2
     created: "2026-09-22T12:59:12.561222894Z"
     description: Generic Kubernetes workloads, services, routes, configuration and
       monitoring
@@ -31,4 +41,4 @@ entries:
     urls:
     - https://github.com/lolmeida/platform-helm/releases/download/platform-workload-0.1.0/platform-workload-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-22T12:59:12.561242711Z"
+generated: "2026-09-22T13:24:04.686194011Z"
