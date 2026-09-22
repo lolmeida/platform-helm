@@ -9,6 +9,8 @@ defaults:
   containerSecurityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
   resources: {}
   automountServiceAccountToken: false
+profiles: {}
+servicesFromWorkloads: false
 runtimeConfig: {}
 configMaps: {}
 workloads: {}

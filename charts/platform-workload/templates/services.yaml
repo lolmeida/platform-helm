@@ -1,25 +1,20 @@
 {{- $root := . -}}
 {{- range $name, $service := .Values.services }}
 {{- if or (not (hasKey $service "enabled")) $service.enabled }}
-{{- $workload := index $root.Values.workloads $service.workload -}}
-{{- if not $workload }}{{ fail (printf "service %s references missing workload %s" $name $service.workload) }}{{ end }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "platform-workload.fullname" $root }}-{{ $name }}
-  namespace: {{ include "platform-workload.namespace" $root }}
-  labels:
-    {{- include "platform-workload.labels" $root | nindent 4 }}
-    app.kubernetes.io/component: {{ $service.workload }}
-spec:
-  type: {{ $service.type | default "ClusterIP" }}
-  selector:
-    {{- include "platform-workload.selectorLabels" (dict "root" $root "name" $service.workload) | nindent 4 }}
-  ports:
-    - name: {{ $service.portName | default "http" }}
-      {{- if or (lt (int $service.port) 1) (gt (int $service.port) 65535) }}{{ fail (printf "services.%s.port must be between 1 and 65535" $name) }}{{ end }}
-      port: {{ required (printf "services.%s.port is required" $name) $service.port }}
-      targetPort: {{ $service.targetPort | default "http" }}
+{{ include "platform-workload.renderService" (dict "root" $root "name" $name "service" $service) }}
+{{- end }}
+{{- end }}
+{{- if $root.Values.servicesFromWorkloads }}
+{{- range $workloadName, $workload := $root.Values.workloads }}
+{{- $effective := include "platform-workload.effectiveWorkload" (dict "root" $root "name" $workloadName "workload" $workload) | fromYaml }}
+{{- with $effective.service }}
+{{- if or (not (hasKey . "enabled")) .enabled }}
+{{- $serviceName := .name | default $workloadName }}
+{{- if hasKey $root.Values.services $serviceName }}{{ fail (printf "generated service %s conflicts with explicit service" $serviceName) }}{{ end }}
+{{- $generatedService := deepCopy . }}
+{{- $_ := set $generatedService "workload" $workloadName }}
+{{ include "platform-workload.renderService" (dict "root" $root "name" $serviceName "service" $generatedService) }}
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

@@ -1,0 +1,22 @@
+servicesFromWorkloads: true
+profiles:
+  quarkus-api:
+    replicas: 2
+    containerPort: 8080
+    env:
+      PROFILE_ENV: from-profile
+      OVERRIDE_ENV: from-profile
+    service:
+      port: 8080
+    probes:
+      readiness:
+        path: /q/health/ready
+workloads:
+  api:
+    profile: quarkus-api
+    image:
+      repository: example/api
+      tag: v1
+    env:
+      OVERRIDE_ENV: from-workload
+      WORKLOAD_ENV: present
