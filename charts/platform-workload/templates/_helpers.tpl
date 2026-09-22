@@ -23,3 +23,18 @@ app.kubernetes.io/component: {{ .name }}
 {{- if $image.digest -}}{{ printf "%s%s@%s" $repository (ternary (printf ":%s" $image.tag) "" (not (empty $image.tag))) $image.digest -}}
 {{- else if $image.tag -}}{{ printf "%s:%s" $repository $image.tag -}}{{- else -}}{{ fail "image requires tag or digest" }}{{- end -}}
 {{- end -}}
+{{- define "platform-workload.effectiveWorkload" -}}
+{{- $root := .root -}}
+{{- $workload := .workload -}}
+{{- $profileName := $workload.profile | default "" -}}
+{{- $profile := dict -}}
+{{- if $profileName -}}
+  {{- if not (hasKey $root.Values.profiles $profileName) -}}
+    {{- fail (printf "workloads.%s references missing profile %s" .name $profileName) -}}
+  {{- end -}}
+  {{- $profile = get $root.Values.profiles $profileName -}}
+{{- end -}}
+{{- $effective := deepCopy $profile -}}
+{{- $effective = mergeOverwrite $effective (deepCopy $workload) -}}
+{{- toYaml $effective -}}
+{{- end -}}
