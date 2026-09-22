@@ -10,6 +10,8 @@ grep -q "name: OVERRIDE_ENV" /tmp/platform-workload-profiles.yaml
 grep -q "value: \"from-workload\"" /tmp/platform-workload-profiles.yaml
 grep -q "name: PROFILE_ENV" /tmp/platform-workload-profiles.yaml
 grep -q "name: WORKLOAD_ENV" /tmp/platform-workload-profiles.yaml
+grep -q "kind: Service" /tmp/platform-workload-profiles.yaml
+grep -q "name: profiles-api" /tmp/platform-workload-profiles.yaml
 grep -q 'kind: Deployment' /tmp/platform-workload-minimal.yaml
 grep -q 'checksum/config:' /tmp/platform-workload-full.yaml
 grep -q 'kind: PodMonitor' /tmp/platform-workload-full.yaml
