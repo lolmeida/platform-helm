@@ -1,3 +1,4 @@
+servicesFromWorkloads: true
 profiles:
   quarkus-api:
     replicas: 2
@@ -5,6 +6,8 @@ profiles:
     env:
       PROFILE_ENV: from-profile
       OVERRIDE_ENV: from-profile
+    service:
+      port: 8080
     probes:
       readiness:
         path: /q/health/ready
