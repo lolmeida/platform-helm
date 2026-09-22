@@ -70,10 +70,12 @@ spec:
 {{- $name := .name -}}
 {{- if hasKey $root.Values.services $name -}}true
 {{- else if $root.Values.servicesFromWorkloads -}}
-  {{- $rawWorkload := index $root.Values.workloads $name -}}
-  {{- if $rawWorkload -}}
-    {{- $effective := include "platform-workload.effectiveWorkload" (dict "root" $root "workload" $rawWorkload "name" $name) | fromYaml -}}
-    {{- if and (hasKey $effective "service") (or (not (hasKey $effective.service "enabled")) $effective.service.enabled) }}true{{- else }}false{{- end }}
-  {{- else }}false{{- end }}
-{{- else }}false{{- end }}
+  {{- range $workloadName, $workload := $root.Values.workloads -}}
+    {{- $effective := include "platform-workload.effectiveWorkload" (dict "root" $root "workload" $workload "name" $workloadName) | fromYaml -}}
+    {{- with $effective.service -}}
+      {{- $serviceName := .name | default $workloadName -}}
+      {{- if and (eq $serviceName $name) (or (not (hasKey . "enabled")) .enabled) }}true{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- end -}}
