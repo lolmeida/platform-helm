@@ -17,3 +17,30 @@ The chart does not create a Namespace. Service-account token mounting is disable
 Values contract changes that require consumer changes are a SemVer major version. Additive optional values are minor releases; fixes are patch releases. The repository publishes the chart through GitHub Pages on pushes to `main`; consume it with `https://lolmeida.github.io/platform-helm` and a pinned SemVer constraint. OCI publication is optional and requires a token with package-write scope.
 
 Run `tests/render.sh` before publishing the chart.
+
+## Workload profiles
+
+Workloads may reference a reusable profile. The profile supplies common workload fields and the workload values override the profile through a recursive merge.
+
+```yaml
+profiles:
+  quarkus-api:
+    replicas: 1
+    containerPort: 8080
+    env:
+      LOG_JSON_ENABLED: "false"
+    probes:
+      readiness:
+        path: /q/health/ready
+
+workloads:
+  core-api:
+    profile: quarkus-api
+    image:
+      repository: example/core-api
+      tag: dev
+    env:
+      PEAH_OBSERVABILITY_SERVICE: core-api
+```
+
+Profiles are optional and preserve the original explicit workload contract when unused.
