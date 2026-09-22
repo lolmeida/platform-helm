@@ -15,7 +15,7 @@ metadata:
 spec:
   type: {{ $service.type | default "ClusterIP" }}
   selector:
-    {{- include "platform-workload.workloadLabels" (dict "root" $root "name" $service.workload) | nindent 4 }}
+    {{- include "platform-workload.selectorLabels" (dict "root" $root "name" $service.workload) | nindent 4 }}
   ports:
     - name: {{ $service.portName | default "http" }}
       {{- if or (lt (int $service.port) 1) (gt (int $service.port) 65535) }}{{ fail (printf "services.%s.port must be between 1 and 65535" $name) }}{{ end }}
