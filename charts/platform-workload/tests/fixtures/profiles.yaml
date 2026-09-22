@@ -20,3 +20,10 @@ workloads:
     env:
       OVERRIDE_ENV: from-workload
       WORKLOAD_ENV: present
+routes:
+  api:
+    host: example.test
+    rules:
+      - path: /
+        service: api
+        port: 8080
