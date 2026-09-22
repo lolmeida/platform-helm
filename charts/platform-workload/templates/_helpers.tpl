@@ -23,6 +23,32 @@ app.kubernetes.io/component: {{ .name }}
 {{- if $image.digest -}}{{ printf "%s%s@%s" $repository (ternary (printf ":%s" $image.tag) "" (not (empty $image.tag))) $image.digest -}}
 {{- else if $image.tag -}}{{ printf "%s:%s" $repository $image.tag -}}{{- else -}}{{ fail "image requires tag or digest" }}{{- end -}}
 {{- end -}}
+{{- define "platform-workload.renderService" -}}
+{{- $root := .root -}}
+{{- $name := .name -}}
+{{- $service := .service -}}
+{{- $workload := index $root.Values.workloads $service.workload -}}
+{{- if not $workload }}{{ fail (printf "service %s references missing workload %s" $name $service.workload) }}{{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "platform-workload.fullname" $root }}-{{ $name }}
+  namespace: {{ include "platform-workload.namespace" $root }}
+  labels:
+    {{- include "platform-workload.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $service.workload }}
+spec:
+  type: {{ $service.type | default "ClusterIP" }}
+  selector:
+    {{- include "platform-workload.selectorLabels" (dict "root" $root "name" $service.workload) | nindent 4 }}
+  ports:
+    - name: {{ $service.portName | default "http" }}
+      {{- if or (lt (int $service.port) 1) (gt (int $service.port) 65535) }}{{ fail (printf "services.%s.port must be between 1 and 65535" $name) }}{{ end }}
+      port: {{ required (printf "services.%s.port is required" $name) $service.port }}
+      targetPort: {{ $service.targetPort | default "http" }}
+{{- end -}}
+
 {{- define "platform-workload.effectiveWorkload" -}}
 {{- $root := .root -}}
 {{- $workload := .workload -}}
