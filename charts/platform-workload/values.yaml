@@ -10,6 +10,7 @@ defaults:
   resources: {}
   automountServiceAccountToken: false
 profiles: {}
+servicesFromWorkloads: false
 runtimeConfig: {}
 configMaps: {}
 workloads: {}
