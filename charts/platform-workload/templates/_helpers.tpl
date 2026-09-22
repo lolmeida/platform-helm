@@ -11,6 +11,12 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" }}
 {{ include "platform-workload.labels" .root }}
 app.kubernetes.io/component: {{ .name }}
 {{- end -}}
+{{- define "platform-workload.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "platform-workload.name" .root }}
+app.kubernetes.io/instance: {{ .root.Release.Name }}
+app.kubernetes.io/managed-by: {{ .root.Release.Service }}
+app.kubernetes.io/component: {{ .name }}
+{{- end -}}
 {{- define "platform-workload.image" -}}
 {{- $image := .image -}}{{- $repository := required "image.repository is required" $image.repository -}}
 {{- if and $image.digest (not (regexMatch "^sha256:[a-f0-9]{64}$" $image.digest)) }}{{ fail "image.digest must match sha256:<64 lowercase hexadecimal characters>" }}{{ end -}}
