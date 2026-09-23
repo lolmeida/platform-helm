@@ -4,7 +4,7 @@
 {{- $hostRules := $route.hosts | default (list (dict "host" $route.host "rules" $route.rules)) }}
 {{- range $hostConfig := $hostRules }}
 {{- range $rule := $hostConfig.rules }}
-{{- if not (index $root.Values.services $rule.service) }}{{ fail (printf "route %s references missing service %s" $name $rule.service) }}{{ end }}
+{{- if ne (include "platform-workload.hasService" (dict "root" $root "name" $rule.service) | trim) "true" }}{{ fail (printf "route %s references missing service %s" $name $rule.service) }}{{ end }}
 {{- end }}
 {{- end }}
 ---

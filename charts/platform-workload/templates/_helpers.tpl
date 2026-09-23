@@ -64,3 +64,18 @@ spec:
 {{- $effective = mergeOverwrite $effective (deepCopy $workload) -}}
 {{- toYaml $effective -}}
 {{- end -}}
+
+{{- define "platform-workload.hasService" -}}
+{{- $root := .root -}}
+{{- $name := .name -}}
+{{- if hasKey $root.Values.services $name -}}true
+{{- else if $root.Values.servicesFromWorkloads -}}
+  {{- range $workloadName, $workload := $root.Values.workloads -}}
+    {{- $effective := include "platform-workload.effectiveWorkload" (dict "root" $root "workload" $workload "name" $workloadName) | fromYaml -}}
+    {{- with $effective.service -}}
+      {{- $serviceName := .name | default $workloadName -}}
+      {{- if and (eq $serviceName $name) (or (not (hasKey . "enabled")) .enabled) }}true{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}

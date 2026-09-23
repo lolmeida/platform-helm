@@ -7,6 +7,7 @@ profiles:
       PROFILE_ENV: from-profile
       OVERRIDE_ENV: from-profile
     service:
+      name: public-api
       port: 8080
     probes:
       readiness:
@@ -20,3 +21,10 @@ workloads:
     env:
       OVERRIDE_ENV: from-workload
       WORKLOAD_ENV: present
+routes:
+  api:
+    host: example.test
+    rules:
+      - path: /
+        service: public-api
+        port: 8080
