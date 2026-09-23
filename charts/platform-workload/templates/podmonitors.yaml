@@ -1,7 +1,8 @@
 {{- $root := . -}}
 {{- range $name, $monitor := .Values.monitoring }}
 {{- if or (not (hasKey $monitor "enabled")) $monitor.enabled }}
-{{- if not (index $root.Values.services $monitor.service) }}{{ fail (printf "monitoring %s references missing service %s" $name $monitor.service) }}{{ end }}
+{{- $service := include "platform-workload.serviceForName" (dict "root" $root "name" $monitor.service) | fromYaml }}
+{{- if not $service }}{{ fail (printf "monitoring %s references missing service %s" $name $monitor.service) }}{{ end }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
@@ -13,7 +14,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "platform-workload.workloadLabels" (dict "root" $root "name" (index $root.Values.services $monitor.service).workload) | nindent 6 }}
+      {{- include "platform-workload.workloadLabels" (dict "root" $root "name" $service.workload) | nindent 6 }}
   podMetricsEndpoints:
     - port: {{ $monitor.portName | default "http" }}
       path: {{ required (printf "monitoring.%s.path is required" $name) $monitor.path }}
