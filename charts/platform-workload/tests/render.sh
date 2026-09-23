@@ -12,6 +12,8 @@ grep -q "name: PROFILE_ENV" /tmp/platform-workload-profiles.yaml
 grep -q "name: WORKLOAD_ENV" /tmp/platform-workload-profiles.yaml
 grep -q "kind: Service" /tmp/platform-workload-profiles.yaml
 grep -q "app.kubernetes.io/component: api" /tmp/platform-workload-profiles.yaml
+grep -q "kind: PodMonitor" /tmp/platform-workload-profiles.yaml
+grep -q "path: /metrics" /tmp/platform-workload-profiles.yaml
 grep -q 'kind: Deployment' /tmp/platform-workload-minimal.yaml
 grep -q 'checksum/config:' /tmp/platform-workload-full.yaml
 grep -q 'kind: PodMonitor' /tmp/platform-workload-full.yaml
