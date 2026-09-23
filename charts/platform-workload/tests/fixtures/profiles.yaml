@@ -28,3 +28,7 @@ routes:
       - path: /
         service: public-api
         port: 8080
+monitoring:
+  api:
+    service: public-api
+    path: /metrics
