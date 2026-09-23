@@ -65,17 +65,27 @@ spec:
 {{- toYaml $effective -}}
 {{- end -}}
 
-{{- define "platform-workload.hasService" -}}
+{{- define "platform-workload.serviceForName" -}}
 {{- $root := .root -}}
 {{- $name := .name -}}
-{{- if hasKey $root.Values.services $name -}}true
+{{- with (get $root.Values.services $name) -}}
+{{- toYaml . -}}
 {{- else if $root.Values.servicesFromWorkloads -}}
   {{- range $workloadName, $workload := $root.Values.workloads -}}
     {{- $effective := include "platform-workload.effectiveWorkload" (dict "root" $root "workload" $workload "name" $workloadName) | fromYaml -}}
     {{- with $effective.service -}}
       {{- $serviceName := .name | default $workloadName -}}
-      {{- if and (eq $serviceName $name) (or (not (hasKey . "enabled")) .enabled) }}true{{- end -}}
+      {{- if and (eq $serviceName $name) (or (not (hasKey . "enabled")) .enabled) -}}
+        {{- $generatedService := deepCopy . -}}
+        {{- $_ := set $generatedService "workload" $workloadName -}}
+        {{- toYaml $generatedService -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
+{{- end -}}
+
+{{- define "platform-workload.hasService" -}}
+{{- $service := include "platform-workload.serviceForName" . | fromYaml -}}
+{{- if $service }}true{{- end -}}
 {{- end -}}
